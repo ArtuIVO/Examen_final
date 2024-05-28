@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
-
+from tkinter import filedialog
+import openpyxl
 
 class Node:
     def __init__(self, student_id, name):
@@ -9,7 +10,6 @@ class Node:
         self.left = None
         self.right = None
         self.height = 1
-
 
 class AVLTree:
     def insert(self, root, student_id, name):
@@ -130,7 +130,6 @@ class AVLTree:
             res = res + self.in_order(root.right)
         return res
 
-
 class AVLGUI:
     def __init__(self, root):
         self.tree = AVLTree()
@@ -159,6 +158,9 @@ class AVLGUI:
 
         self.list_button = tk.Button(self.root, text="Listar estudiantes", command=self.list_students)
         self.list_button.pack(side=tk.LEFT)
+
+        self.export_button = tk.Button(self.root, text="Exportar a Excel", command=self.export_to_excel)
+        self.export_button.pack(side=tk.LEFT)
 
     def insert(self):
         try:
@@ -199,6 +201,22 @@ class AVLGUI:
         else:
             messagebox.showinfo("List of Students", "No students found.")
 
+    def export_to_excel(self):
+        students = self.tree.in_order(self.tree_root)
+        if students:
+            file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")])
+            if file_path:
+                workbook = openpyxl.Workbook()
+                sheet = workbook.active
+                sheet.title = "Estudiantes"
+                sheet.append(["ID", "Nombre"])
+                for student in students:
+                    sheet.append([student[0], student[1]])
+                workbook.save(file_path)
+                messagebox.showinfo("Export Successful", f"Students have been successfully exported to {file_path}")
+        else:
+            messagebox.showinfo("Export Failed", "No students found to export.")
+
     def display_tree(self):
         self.canvas.delete("all")
         if self.tree_root:
@@ -214,7 +232,6 @@ class AVLGUI:
             if node.right:
                 self.canvas.create_line(x, y, x + x_offset, y + 60)
                 self._display_tree(node.right, x + x_offset, y + 60, x_offset // 2)
-
 
 if __name__ == "__main__":
     root = tk.Tk()
